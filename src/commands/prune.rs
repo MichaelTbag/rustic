@@ -5,7 +5,7 @@ use std::str::FromStr;
 use anyhow::{anyhow, bail, Result};
 use bytesize::ByteSize;
 use chrono::{DateTime, Duration, Local};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use derive_more::Add;
 use futures::{future, TryStreamExt};
 use log::*;
@@ -19,7 +19,6 @@ use crate::index::{IndexBackend, IndexCollector, IndexType, IndexedBackend, Inde
 use crate::repo::{ConfigFile, IndexBlob, IndexFile, IndexPack, SnapshotFile};
 
 #[derive(Parser)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub(super) struct Opts {
     /// Don't remove anything, only show what would be done
     #[clap(long, short = 'n')]
@@ -182,6 +181,7 @@ pub(super) async fn execute(
     Ok(())
 }
 
+#[derive(Clone)]
 enum LimitOption {
     Size(ByteSize),
     Percentage(u64),

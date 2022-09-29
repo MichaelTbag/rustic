@@ -312,7 +312,7 @@ impl Ord for SnapshotFile {
 }
 
 #[serde_as]
-#[derive(Default, Parser, Deserialize, Merge)]
+#[derive(Clone, Default, Parser, Deserialize, Merge)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct SnapshotFilter {
     /// Path list to filter (can be specified multiple times)
@@ -333,7 +333,7 @@ pub struct SnapshotFilter {
     filter_host: Vec<String>,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct SnapshotGroupCriterion {
     hostname: bool,
     paths: bool,

@@ -41,9 +41,9 @@ use log::*;
 use rustic_config::RusticConfig;
 
 #[derive(Parser)]
-#[clap(about, version)]
+#[clap(about, version, term_width = 120)]
 struct Opts {
-    #[clap(flatten, help_heading = "GLOBAL OPTIONS")]
+    #[clap(flatten, next_help_heading = "GLOBAL OPTIONS")]
     global: GlobalOpts,
 
     /// Config profile to use. This parses the file <PROFILE>.toml in the config directory.
@@ -81,7 +81,7 @@ struct GlobalOpts {
         short,
         long,
         global = true,
-        parse(from_os_str),
+        value_parser,
         env = "RUSTIC_PASSWORD_FILE",
         conflicts_with = "password"
     )]
@@ -115,7 +115,7 @@ struct GlobalOpts {
     #[clap(
         long,
         global = true,
-        parse(from_os_str),
+        value_parser,
         conflicts_with = "no-cache",
         env = "RUSTIC_CACHE_DIR"
     )]

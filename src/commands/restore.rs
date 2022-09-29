@@ -5,7 +5,7 @@ use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, bail, Result};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use derive_getters::Dissolve;
 use futures::{stream::FuturesUnordered, TryStreamExt};
 use ignore::{DirEntry, WalkBuilder};
@@ -22,7 +22,6 @@ use crate::index::{IndexBackend, IndexedBackend};
 use crate::repo::SnapshotFile;
 
 #[derive(Parser)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub(super) struct Opts {
     /// Dry-run: don't restore, only show what would be done
     #[clap(long, short = 'n')]

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 use chrono::{Duration, Local};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use gethostname::gethostname;
 use log::*;
 use merge::Merge;
@@ -22,7 +22,6 @@ use crate::repo::{ConfigFile, DeleteOption, SnapshotFile, SnapshotSummary, Strin
 
 #[serde_as]
 #[derive(Clone, Default, Parser, Deserialize, Merge)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 #[serde(default, rename_all = "kebab-case")]
 pub(super) struct Opts {
     /// Do not upload or write any data, just show what would be done

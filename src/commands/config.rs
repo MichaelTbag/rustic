@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use bytesize::ByteSize;
-use clap::{AppSettings, Parser};
+use clap::Parser;
 
 use crate::backend::{DecryptBackend, DecryptFullBackend, DecryptWriteBackend, WriteBackend};
 use crate::repo::ConfigFile;
@@ -40,7 +40,6 @@ pub(super) async fn execute(
 }
 
 #[derive(Parser)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub(super) struct ConfigOpts {
     /// Set compression level. Allowed levels are 1 to 22 and -1 to -7, see https://facebook.github.io/zstd/.
     /// Note that 0 equals to no compression

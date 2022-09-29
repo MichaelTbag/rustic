@@ -14,7 +14,7 @@ use crate::repo::{
 
 #[derive(Parser)]
 pub(super) struct Opts {
-    #[clap(flatten, help_heading = "SNAPSHOT FILTER OPTIONS")]
+    #[clap(flatten, next_help_heading = "SNAPSHOT FILTER OPTIONS")]
     filter: SnapshotFilter,
 
     /// Group snapshots by any combination of host,paths,tags

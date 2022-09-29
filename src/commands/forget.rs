@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use anyhow::Result;
 use chrono::{DateTime, Datelike, Duration, Local, Timelike};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use derivative::Derivative;
 use merge::Merge;
 use prettytable::{format, row, Table};
@@ -16,8 +16,11 @@ use crate::repo::{
 };
 
 #[derive(Parser)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub(super) struct Opts {
+    /// Snapshots to forget
+    #[clap(value_name = "ID")]
+    ids: Vec<String>,
+
     #[clap(flatten)]
     config: ConfigOpts,
 
@@ -25,20 +28,19 @@ pub(super) struct Opts {
     #[clap(long)]
     prune: bool,
 
-    #[clap(flatten, help_heading = "PRUNE OPTIONS (only when used with --prune)")]
+    #[clap(
+        flatten,
+        next_help_heading = "PRUNE OPTIONS (only when used with --prune)"
+    )]
     prune_opts: prune::Opts,
 
     /// Don't remove anything, only show what would be done
     #[clap(skip)]
     dry_run: bool,
-
-    /// Snapshots to forget
-    ids: Vec<String>,
 }
 
 #[serde_as]
 #[derive(Default, Parser, Deserialize, Merge)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 #[serde(default, rename_all = "kebab-case")]
 struct ConfigOpts {
     /// Group snapshots by any combination of host,paths,tags (default: "host,paths")
@@ -46,11 +48,11 @@ struct ConfigOpts {
     #[serde_as(as = "Option<DisplayFromStr>")]
     group_by: Option<SnapshotGroupCriterion>,
 
-    #[clap(flatten, help_heading = "SNAPSHOT FILTER OPTIONS")]
+    #[clap(flatten, next_help_heading = "SNAPSHOT FILTER OPTIONS")]
     #[serde(flatten)]
     filter: SnapshotFilter,
 
-    #[clap(flatten, help_heading = "RETENTION OPTIONS")]
+    #[clap(flatten, next_help_heading = "RETENTION OPTIONS")]
     #[serde(flatten)]
     keep: KeepOptions,
 }

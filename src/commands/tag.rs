@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{Duration, Local};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 
 use super::{progress_counter, RusticConfig};
 use crate::backend::{DecryptFullBackend, FileType};
@@ -8,7 +8,6 @@ use crate::id::Id;
 use crate::repo::{DeleteOption, SnapshotFile, SnapshotFilter, StringList};
 
 #[derive(Parser)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 pub(super) struct Opts {
     /// Don't change any snapshot, only show which would be modified
     #[clap(long, short = 'n')]
@@ -16,7 +15,7 @@ pub(super) struct Opts {
 
     #[clap(
         flatten,
-        help_heading = "SNAPSHOT FILTER OPTIONS (if no snapshot is given)"
+        next_help_heading = "SNAPSHOT FILTER OPTIONS (if no snapshot is given)"
     )]
     filter: SnapshotFilter,
 
@@ -25,7 +24,7 @@ pub(super) struct Opts {
         long,
         value_name = "TAG[,TAG,..]",
         conflicts_with = "remove",
-        help_heading = "TAG OPTIONS"
+        next_help_heading = "TAG OPTIONS"
     )]
     add: Vec<StringList>,
 
