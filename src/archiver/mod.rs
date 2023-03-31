@@ -14,6 +14,7 @@ use anyhow::Result;
 use chrono::Local;
 use indicatif::ProgressBar;
 use log::*;
+use pariter::{scope, IteratorExt};
 
 use crate::backend::{DecryptWriteBackend, ReadSource, ReadSourceEntry};
 use crate::blob::BlobType;
@@ -53,13 +54,17 @@ impl<BE: DecryptWriteBackend, I: IndexedBackend> Archiver<BE, I> {
         })
     }
 
-    pub fn archive(
+    pub fn archive<R>(
         mut self,
-        src: impl ReadSource,
+        src: R,
         backup_path: &Path,
         as_path: Option<&PathBuf>,
         p: &ProgressBar,
-    ) -> Result<SnapshotFile> {
+    ) -> Result<SnapshotFile>
+    where
+        R: ReadSource + 'static,
+        <R as ReadSource>::Open: Send,
+    {
         if !p.is_hidden() {
             if let Some(size) = src.size()? {
                 p.set_length(size);
@@ -98,28 +103,33 @@ impl<BE: DecryptWriteBackend, I: IndexedBackend> Archiver<BE, I> {
         // handle beginning and ending of trees
         let iter = TreeIterator::new(iter);
 
-        // use parent snapshot
-        let iter = iter.filter_map(|item| match self.parent.process(item) {
-            Ok(item) => Some(item),
-            Err(err) => {
-                warn!("ignoring error reading parent snapshot: {err:?}");
-                None
-            }
-        });
+        scope(|scope| {
+            // use parent snapshot
+            let iter = iter.filter_map(|item| match self.parent.process(item) {
+                Ok(item) => Some(item),
+                Err(err) => {
+                    warn!("ignoring error reading parent snapshot: {err:?}");
+                    None
+                }
+            });
 
-        // archive files
-        let iter = iter.filter_map(|item| match self.file_archiver.process(item, p.clone()) {
-            Ok(item) => Some(item),
-            Err(err) => {
-                warn!("ignoring error: {err:?}");
-                None
-            }
-        });
+            // archive files in parallel
+            let iter = iter
+                .parallel_map_scoped(scope, |item| self.file_archiver.process(item, p.clone()))
+                .filter_map(|item| match item {
+                    Ok(item) => Some(item),
+                    Err(err) => {
+                        warn!("ignoring error: {err:?}");
+                        None
+                    }
+                });
 
-        // save items in trees
-        for item in iter {
-            self.tree_archiver.add(item)?;
-        }
+            // save items in trees
+            for item in iter {
+                self.tree_archiver.add(item).unwrap();
+            }
+        })
+        .unwrap();
 
         let snap = self.finalize_snapshot()?;
         p.finish_with_message("done");
